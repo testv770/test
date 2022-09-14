@@ -1,0 +1,438 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  audits                      Audit[]
+  contactsContactId           Contact[]                 @relation(name: "contactId")
+  contactsIdentityId          Contact[]                 @relation(name: "contactsIdentityId")
+  country                     String?
+  createdAt                   DateTime                  @default(now())
+  email                       String?
+  fileData                    FileDatum[]
+  fileViewSettings            FileViewSetting[]
+  fileViews_identity          FileView[]                @relation(name: "fileViews_identity")
+  fileViews_watchId           FileView[]                @relation(name: "fileViews_watchId")
+  firstName                   String?
+  groupMembers                GroupMember[]
+  groups                      Group[]
+  hashtags                    Hashtag[]
+  id                          String                    @id @default(cuid())
+  isActive                    Boolean?
+  isBlock                     EnumUserBlock?            @relation(fields: [isBlockId], references: [id])
+  isBlockId                   String?
+  isRegistered                Boolean?
+  keyReadFirebase             String?
+  lastName                    String?
+  linkData                    LinkDatum[]
+  networkPosts                NetworkPost[]
+  password                    String
+  permissionGroupNames        PermissionGroupName[]
+  phone                       String                    @unique
+  profiles                    Profile[]
+  requestDataAdkId_adkId      RequestDatum[]            @relation(name: "askId")
+  requestDataRecipientId      RequestDatum[]            @relation(name: "requestDataRecipientId")
+  roles                       String[]
+  shareIdentities             ShareIdentity[]
+  sharingUnregisteredUsers    SharingUnregisteredUser[]
+  suggestionData_recipientId  SuggestionDatum[]         @relation(name: "suggestionData_recipientId")
+  suggestionData_suggestionId SuggestionDatum[]         @relation(name: "suggestionData_suggestionId")
+  templates                   Template[]
+  updatedAt                   DateTime                  @updatedAt
+  userFcms                    UserFcm[]
+  userLocations               UserLocation[]
+  username                    String                    @unique
+}
+
+model GroupTemplate {
+  createdAt    DateTime  @default(now())
+  groupId      Group?    @relation(fields: [groupIdId], references: [id])
+  groupIdId    String?
+  id           String    @id @default(cuid())
+  templateId   Template? @relation(fields: [templateIdId], references: [id])
+  templateIdId String?
+  updatedAt    DateTime  @updatedAt
+}
+
+model CategoryTemplate {
+  categoryId   Category? @relation(fields: [categoryIdId], references: [id])
+  categoryIdId String?
+  createdAt    DateTime  @default(now())
+  id           String    @id @default(cuid())
+  templateId   Template? @relation(fields: [templateIdId], references: [id])
+  templateIdId String?
+  updatedAt    DateTime  @updatedAt
+}
+
+model Template {
+  categoryTemplates CategoryTemplate[]
+  createdAt         DateTime           @default(now())
+  groupTemplates    GroupTemplate[]
+  id                String             @id @default(cuid())
+  ownerId           User?              @relation(fields: [ownerIdId], references: [id])
+  ownerIdId         String?
+  templateName      String?
+  updatedAt         DateTime           @updatedAt
+}
+
+model Profile {
+  backgroundImage String?
+  categoryView    Category? @relation(fields: [categoryViewId], references: [id])
+  categoryViewId  String?
+  content         String?
+  createdAt       DateTime  @default(now())
+  id              String    @id @default(cuid())
+  identityId      User?     @relation(fields: [identityIdId], references: [id])
+  identityIdId    String?
+  image           String?
+  themeColor      String?
+  title           String?
+  totalFileWeight String?
+  updatedAt       DateTime  @updatedAt
+}
+
+model Contact {
+  birth               DateTime?
+  company             String?
+  contactId           User?               @relation(name: "contactId", fields: [contactIdId], references: [id])
+  contactIdId         String?
+  createdAt           DateTime            @default(now())
+  email               String?
+  firstName           String?
+  home                String?
+  id                  String              @id @default(cuid())
+  identityId          User?               @relation(name: "contactsIdentityId", fields: [identityIdId], references: [id])
+  identityIdId        String?
+  image               String?
+  lastName            String?
+  mobile              String?
+  permissionContacts  PermissionContact[]
+  permissionGroupId   PermissionGroup?    @relation(fields: [permissionGroupIdId], references: [id])
+  permissionGroupIdId String?
+  phone               String?
+  updatedAt           DateTime            @updatedAt
+}
+
+model GroupMember {
+  createdAt  DateTime @default(now())
+  groupId    Group?   @relation(fields: [groupIdId], references: [id])
+  groupIdId  String?
+  id         String   @id @default(cuid())
+  memberId   User?    @relation(fields: [memberIdId], references: [id])
+  memberIdId String?
+  updatedAt  DateTime @updatedAt
+}
+
+model SharingUnregisteredUser {
+  createdAt   DateTime  @default(now())
+  expiration  DateTime?
+  id          String    @id @default(cuid())
+  sharingId   User?     @relation(fields: [sharingIdId], references: [id])
+  sharingIdId String?
+  updatedAt   DateTime  @updatedAt
+  url         String?
+}
+
+model Group {
+  createdAt      DateTime        @default(now())
+  groupMembers   GroupMember[]
+  groupname      String?
+  groupTemplates GroupTemplate[]
+  id             String          @id @default(cuid())
+  isDefaultGroup Boolean?
+  ownerId        User?           @relation(fields: [ownerIdId], references: [id])
+  ownerIdId      String?
+  updatedAt      DateTime        @updatedAt
+}
+
+model RequestDatum {
+  askId               User?             @relation(name: "askId", fields: [askIdId], references: [id])
+  askIdId             String?
+  categoryRequestId   Category?         @relation(fields: [categoryRequestIdId], references: [id])
+  categoryRequestIdId String?
+  createdAt           DateTime          @default(now())
+  duration            DateTime?
+  fileId              FileDatum?        @relation(fields: [fileIdId], references: [id])
+  fileIdId            String?
+  id                  String            @id @default(cuid())
+  linkId              LinkDatum?        @relation(fields: [linkIdId], references: [id])
+  linkIdId            String?
+  recipientId         User?             @relation(name: "requestDataRecipientId", fields: [recipientIdId], references: [id])
+  recipientIdId       String?
+  statusId            EnumRequestDatum? @relation(fields: [statusIdId], references: [id])
+  statusIdId          String?
+  updatedAt           DateTime          @updatedAt
+}
+
+model EnumSuggestionDatum {
+  createdAt      DateTime                       @default(now())
+  id             String                         @id @default(cuid())
+  status         EnumEnumSuggestionDatumStatus?
+  suggestionData SuggestionDatum[]
+  updatedAt      DateTime                       @updatedAt
+}
+
+model EnumRequestDatum {
+  createdAt   DateTime                    @default(now())
+  id          String                      @id @default(cuid())
+  requestData RequestDatum[]
+  status      EnumEnumRequestDatumStatus?
+  updatedAt   DateTime                    @updatedAt
+}
+
+model EnumUserBlock {
+  createdAt DateTime                 @default(now())
+  id        String                   @id @default(cuid())
+  status    EnumEnumUserBlockStatus?
+  updatedAt DateTime                 @updatedAt
+  users     User[]
+}
+
+model Category {
+  categoryName      String?
+  categoryTemplates CategoryTemplate[]
+  createdAt         DateTime           @default(now())
+  fileData          FileDatum[]
+  id                String             @id @default(cuid())
+  linkData          LinkDatum[]
+  profiles          Profile[]
+  requestData       RequestDatum[]
+  suggestionData    SuggestionDatum[]
+  updatedAt         DateTime           @updatedAt
+}
+
+model LinkDatum {
+  categoryId   Category?      @relation(fields: [categoryIdId], references: [id])
+  categoryIdId String?
+  createdAt    DateTime       @default(now())
+  id           String         @id @default(cuid())
+  isPublic     Boolean?
+  link         String?
+  ownerId      User?          @relation(fields: [ownerIdId], references: [id])
+  ownerIdId    String?
+  requestData  RequestDatum[]
+  title        String?
+  updatedAt    DateTime       @updatedAt
+}
+
+model FileDatum {
+  cateogyId      Category?        @relation(fields: [cateogyIdId], references: [id])
+  cateogyIdId    String?
+  createdAt      DateTime         @default(now())
+  deleted        Boolean?
+  file           String?
+  fileType       String?
+  fileViews      FileView[]
+  hashtagFiles   HashtagFile[]
+  id             String           @id @default(cuid())
+  isFile         Boolean?
+  isGallery      Boolean?
+  isPublic       Boolean?
+  ownerId        User?            @relation(fields: [ownerIdId], references: [id])
+  ownerIdId      String?
+  permissionId   PermissionGroup? @relation(fields: [permissionIdId], references: [id])
+  permissionIdId String?
+  requestData    RequestDatum[]
+  title          String?
+  updatedAt      DateTime         @updatedAt
+}
+
+model UserLocation {
+  createdAt        DateTime @default(now())
+  id               String   @id @default(cuid())
+  identityId       User?    @relation(fields: [identityIdId], references: [id])
+  identityIdId     String?
+  isPublicLocation Boolean?
+  updatedAt        DateTime @updatedAt
+}
+
+model UserFcm {
+  createdAt DateTime @default(now())
+  fcm       String?
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model SuggestionDatum {
+  categorySuggestionId   Category?            @relation(fields: [categorySuggestionIdId], references: [id])
+  categorySuggestionIdId String?
+  createdAt              DateTime             @default(now())
+  duration               DateTime?
+  id                     String               @id @default(cuid())
+  recipientId            User?                @relation(name: "suggestionData_recipientId", fields: [recipientIdId], references: [id])
+  recipientIdId          String?
+  statusId               EnumSuggestionDatum? @relation(fields: [statusIdId], references: [id])
+  statusIdId             String?
+  suggestionId           User?                @relation(name: "suggestionData_suggestionId", fields: [suggestionIdId], references: [id])
+  suggestionIdId         String?
+  updatedAt              DateTime             @updatedAt
+}
+
+model FileView {
+  createdAt  DateTime   @default(now())
+  fileId     FileDatum? @relation(fields: [fileIdId], references: [id])
+  fileIdId   String?
+  id         String     @id @default(cuid())
+  identity   User?      @relation(name: "fileViews_identity", fields: [identityId], references: [id])
+  identityId String?
+  updatedAt  DateTime   @updatedAt
+  watchId    User?      @relation(name: "fileViews_watchId", fields: [watchIdId], references: [id])
+  watchIdId  String?
+}
+
+model FileViewSetting {
+  createdAt          DateTime             @default(now())
+  generalSettingId   EnumFileViewSetting? @relation(fields: [generalSettingIdId], references: [id])
+  generalSettingIdId String?
+  id                 String               @id @default(cuid())
+  identity           User?                @relation(fields: [identityId], references: [id])
+  identityId         String?
+  updatedAt          DateTime             @updatedAt
+}
+
+model EnumFileViewSetting {
+  createdAt        DateTime                               @default(now())
+  fileViewSettings FileViewSetting[]
+  generalSetting   EnumEnumFileViewSettingGeneralSetting?
+  id               String                                 @id @default(cuid())
+  updatedAt        DateTime                               @updatedAt
+}
+
+model Audit {
+  additionalInfo String?
+  clientIp       String?
+  createdAt      DateTime @default(now())
+  id             String   @id @default(cuid())
+  reqFullUrl     String?
+  reqMethod      String?
+  reqUrl         String?
+  resCode        String?
+  resMessage     String?
+  title          String?
+  updatedAt      DateTime @updatedAt
+  userId         User?    @relation(fields: [userIdId], references: [id])
+  userIdId       String?
+  userName       String?
+  userType       String?
+}
+
+model PermissionGroup {
+  contacts             Contact[]
+  createdAt            DateTime              @default(now())
+  fileData             FileDatum[]
+  files                Boolean?
+  gallery              Boolean?
+  groupName            String?
+  id                   String                @id @default(cuid())
+  location             Boolean?
+  permissionGroupNames PermissionGroupName[]
+  status               Boolean?
+  updatedAt            DateTime              @updatedAt
+}
+
+model PermissionContact {
+  contactRelationId   Contact? @relation(fields: [contactRelationIdId], references: [id])
+  contactRelationIdId String?
+  createdAt           DateTime @default(now())
+  files               Boolean?
+  gallery             Boolean?
+  id                  String   @id @default(cuid())
+  location            Boolean?
+  status              Boolean?
+  updatedAt           DateTime @updatedAt
+}
+
+model PermissionGroupName {
+  createdAt           DateTime         @default(now())
+  groupName           String?
+  id                  String           @id @default(cuid())
+  identityId          User?            @relation(fields: [identityIdId], references: [id])
+  identityIdId        String?
+  permissionGroupId   PermissionGroup? @relation(fields: [permissionGroupIdId], references: [id])
+  permissionGroupIdId String?
+  updatedAt           DateTime         @updatedAt
+}
+
+model ShareIdentity {
+  createdAt          DateTime @default(now())
+  id                 String   @id @default(cuid())
+  identitySharedId   User?    @relation(fields: [identitySharedIdId], references: [id])
+  identitySharedIdId String?
+  updatedAt          DateTime @updatedAt
+}
+
+model NetworkPost {
+  createdAt     DateTime                    @default(now())
+  datePublished DateTime?
+  gif           String?
+  id            String                      @id @default(cuid())
+  identityId    User                        @relation(fields: [identityIdId], references: [id])
+  identityIdId  String
+  image         String?
+  networkType   EnumNetworkPostNetworkType?
+  postId        String?                     @unique
+  postText      String?
+  updatedAt     DateTime                    @updatedAt
+  video         String?
+}
+
+model Hashtag {
+  color        String?
+  createdAt    DateTime      @default(now())
+  hashtagFiles HashtagFile[]
+  hashtagName  String?
+  id           String        @id @default(cuid())
+  identityId   User?         @relation(fields: [identityIdId], references: [id])
+  identityIdId String?
+  updatedAt    DateTime      @updatedAt
+}
+
+model HashtagFile {
+  createdAt   DateTime   @default(now())
+  fileId      FileDatum? @relation(fields: [fileIdId], references: [id])
+  fileIdId    String?
+  hashtagId   Hashtag?   @relation(fields: [hashtagIdId], references: [id])
+  hashtagIdId String?
+  id          String     @id @default(cuid())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum EnumEnumSuggestionDatumStatus {
+  suggested
+  approved
+  canceled
+  rejected
+}
+
+enum EnumEnumRequestDatumStatus {
+  requested
+  approved
+  Canceled
+  rejected
+}
+
+enum EnumEnumUserBlockStatus {
+  block
+  frozen
+  active
+}
+
+enum EnumEnumFileViewSettingGeneralSetting {
+  muteAll
+  allowAll
+  config
+}
+
+enum EnumNetworkPostNetworkType {
+  Facebook
+  Instagram
+  TikTok
+  Twitter
+}
